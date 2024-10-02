@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reloader-deployment
+  namespace: secrets-demo
+  labels:
+    app: reloader-deployment
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reloader-demo-pod
+  template:
+    metadata:
+      labels:
+        app: reloader-demo-pod
+    spec:
+      containers:
+      - name: reloader-demo-pod
+        image: busybox
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: ext-postgres-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ext-postgres-secret
+              key: password
+        command: ["/bin/sh", "-c", "sleep 3600"]
